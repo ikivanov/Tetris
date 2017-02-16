@@ -24,11 +24,11 @@
 		window.onkeydown = function(event) {
 			var code = event.code;
 
-			that.keyboard.keyPressed = code;
-		}
+			if (code !== "ArrowLeft" && code !== "ArrowRight" && code !== "ArrowUp" && code !== "ArrowDown") {
+				return;
+			}
 
-		window.onkeyup = function(event) {
-			that.keyboard.keyPressed = "";
+			that._invalidate(code);
 		}
 	}
 
@@ -54,21 +54,27 @@
 		render: function() {
 			var that = this;
 
-			requestAnimationFrame(that.render.bind(that));
+			that._invalidate();
 
-			that._update();
+			setTimeout(that.render.bind(that), 500);
+		},
+
+		_invalidate: function(keyCode) {
+			var that = this;
+
+			that._update(keyCode);
 
 			that.context.clearRect(0, 0, that.canvas.width, that.canvas.height);
 
 			that._render();
 		},
 
-		_update: function() {
+		_update: function(keyCode) {
 			var that = this;
 
 			that.fpsLabel.update();
 
-			that.fallingTetrimino.update(that.keyboard);
+			that.fallingTetrimino.update(keyCode);
 
 			that._updateBoardGrid();
 		},

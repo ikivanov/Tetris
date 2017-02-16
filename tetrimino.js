@@ -24,7 +24,7 @@
 			return that.matrix[that.angle];
 		},
 
-		update: function(keyboard) {
+		update: function(keyCode) {
 			var that = this,
 				now = new Date();
 
@@ -32,22 +32,21 @@
 				return;
 			}
 
-			var code = keyboard.keyPressed;
-			if (code && code === "ArrowLeft" && that._canProcessKeyboardInput()) {
+			if (keyCode && keyCode === "ArrowLeft") {
 				if (that.col > 0) {
 					that.col--;
 					that.lastKeyPressedTime = now;
 				}
 			}
 
-			if (code && code === "ArrowRight" && that._canProcessKeyboardInput()) {
+			if (keyCode && keyCode === "ArrowRight") {
 				if (that.col < 9) {
 					that.col++;
 					that.lastKeyPressedTime = new Date();
 				}
 			}
 
-			if (code && code === "ArrowUp" && that._canProcessKeyboardInput()) {
+			if (keyCode && keyCode === "ArrowUp") {
 				if (that.angle === 270) {
 					that.angle = 0;
 				} else {
@@ -55,7 +54,10 @@
 				}
 			}
 
-			if (code && code === "ArrowDown" && that._canProcessKeyboardInput()) {
+			if (keyCode && keyCode === "ArrowDown") {
+				that.row++;
+
+				that.lastUpdatedTime = new Date();
 			}
 
 			if (that._canUpdate()) {
