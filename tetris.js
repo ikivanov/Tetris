@@ -11,6 +11,7 @@
 		});
 
 		that.fallingTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino();
+		that.nextTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino();
 
 		that.boardGrid = [];
 
@@ -110,6 +111,7 @@
 			that.fpsLabel.render();
 
 			that._renderBoard();
+			that._renderNextTetriminoPreview();
 		},
 
 		_renderBoard: function() {
@@ -137,7 +139,8 @@
 			if (that.fallingTetrimino.isDown) {
 				that._saveBoardState();
 
-				that.fallingTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino();
+				that.fallingTetrimino = that.nextTetrimino;
+				that.nextTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino();
 			}
 		},
 
@@ -176,7 +179,34 @@
 			ctx.moveTo(307, 0);
 			ctx.lineTo(307, that.canvas.height);
 			ctx.stroke();
-		}
+		},
+
+		_renderNextTetriminoPreview: function() {
+			var that = this,
+				ctx = that.context,
+				tetriminoMatrix = that.nextTetrimino.getMatrix(),
+				startX = 325,
+				startY = 100;
+
+			ctx.font = "20px Arial";
+			ctx.fillStyle = "white";
+			ctx.textAlign = "left";
+			ctx.fillText("Next:", 320, 75);
+
+			for (var i = 0; i < tetriminoMatrix.length; i++) {
+				for (var j = 0; j < tetriminoMatrix[i].length; j++) {
+					var atom = tetriminoMatrix[i][j];
+
+					if (!atom) {
+						continue;
+					}
+
+					ctx.lineWidth = 2;
+					ctx.strokeStyle = "red";
+					ctx.strokeRect(startX + i * 25, startY + j * 25, 25, 25);
+				}
+			}
+		},
 	};
 
 	window.TetrisNamespace = window.TetrisNamespace || {};
