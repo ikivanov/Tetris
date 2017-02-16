@@ -12,14 +12,24 @@
 	}
 
 	function TetriminoFactory() {
+		var that = this;
+
+		that.angles = [0, 90, 180, 270];
+		that.probabilities = ["I", "J", "L", "O", "S", "T", "Z"];
 	}
 
 	TetriminoFactory.prototype = {
-		GetNextTetrimino: function() {
+		getNextTetrimino: function() {
+			var that = this,
+				probabilityIndex = Math.floor(Math.random() * that.probabilities.length),
+				id = that.probabilities[probabilityIndex],
+				angleIndex = Math.floor(Math.random() * that.angles.length),
+				angle = that.angles[angleIndex];
 
+			return that.createById(id, {angle: angle});
 		},
 
-		CreateById: function(id, config) {
+		createById: function(id, config) {
 			var name = TetriminoName[id];
 
 			if (!name) {

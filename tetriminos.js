@@ -9,7 +9,7 @@
 
 		TetrisNamespace.Tetrimino.call(that, config);
 
-		that.rotations = {
+		that.matrix = {
 			"0":
 			[
 				[1, 0],
@@ -43,7 +43,7 @@
 
 		TetrisNamespace.Tetrimino.call(that, config);
 
-		that.rotations = {
+		that.matrix = {
 			"0":
 			[
 				[0, 1],
@@ -83,7 +83,7 @@
 			[1, 1]
 		];
 
-		that.rotations = {
+		that.matrix = {
 			"0": rotation,
 			"90": rotation,
 			"180": rotation,
@@ -110,7 +110,7 @@
 
 		TetrisNamespace.Tetrimino.call(that, config);
 
-		that.rotations = {
+		that.matrix = {
 			"0": horizontal,
 			"90": vertical,
 			"180": horizontal,
@@ -137,7 +137,7 @@
 
 		TetrisNamespace.Tetrimino.call(that, config);
 
-		that.rotations = {
+		that.matrix = {
 			"0": horizontal,
 			"90": vertical,
 			"180": horizontal,
@@ -153,7 +153,7 @@
 
 		TetrisNamespace.Tetrimino.call(that, config);
 
-		that.rotations = {
+		that.matrix = {
 			"0":
 			[
 				[1, 1, 1],
@@ -198,7 +198,7 @@
 
 		TetrisNamespace.Tetrimino.call(that, config);
 
-		that.rotations = {
+		that.matrix = {
 			"0": horizontal,
 			"90": vertical,
 			"180": horizontal,

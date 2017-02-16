@@ -10,11 +10,7 @@
 			position: {x: 320, y: 25}
 		});
 
-		that.fallingFigure = TetrisNamespace.TetriminoFactory.CreateById("Z", {
-			position: {row: 0, col: 3},
-			angle: 0,
-			tetris: that
-		});
+		that.fallingTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino();
 
 		that.boardGrid = [];
 
@@ -71,7 +67,38 @@
 
 			that.fpsLabel.update();
 
-			that.fallingFigure.update(that.keyboard);
+			that.fallingTetrimino.update(that.keyboard);
+
+			that._updateBoardGrid();
+		},
+
+		_updateBoardGrid: function() {
+			var that = this,
+				tetriminoMatrix = that.fallingTetrimino.getMatrix();
+
+			that._restoreBoardState();
+
+			for (var i = tetriminoMatrix.length - 1; i >= 0; i--) {
+				var row = tetriminoMatrix[i];
+
+				for (var j = 0; j < row.length; j++) {
+					var atom = row[j];
+
+					if (!atom) {
+						continue;
+					}
+
+					if (that.fallingTetrimino.row + i === that.boardGrid.length - 1) {
+						that.fallingTetrimino.isDown = true;
+					}
+
+					if (!that.fallingTetrimino.isDown && that.boardGridCopy[that.fallingTetrimino.row + i + 1][that.fallingTetrimino.col + j] === 1) {
+						that.fallingTetrimino.isDown = true; //if next line is occupied
+					}
+
+					that.boardGrid[that.fallingTetrimino.row + i][that.fallingTetrimino.col + j] = 1;
+				}
+			}
 		},
 
 		_render: function() {
@@ -107,14 +134,10 @@
 				}
 			}
 
-			if (that.fallingFigure.isDown) {
+			if (that.fallingTetrimino.isDown) {
 				that._saveBoardState();
 
-				that.fallingFigure = TetrisNamespace.TetriminoFactory.CreateById("J", {
-					position: {row: 0, col: 3},
-					angle: 180,
-					tetris: that
-				});
+				that.fallingTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino();
 			}
 		},
 
