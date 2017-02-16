@@ -9,6 +9,8 @@
 
 		TetrisNamespace.Tetrimino.call(that, config);
 
+		that.color = "orange";
+
 		that.matrix = {
 			"0":
 			[
@@ -42,6 +44,8 @@
 		var that = this;
 
 		TetrisNamespace.Tetrimino.call(that, config);
+
+		that.color = "blue";
 
 		that.matrix = {
 			"0":
@@ -77,6 +81,8 @@
 
 		TetrisNamespace.Tetrimino.call(that, config);
 
+		that.color = "yellow";
+
 		var rotation =
 		[
 			[1, 1],
@@ -110,6 +116,8 @@
 
 		TetrisNamespace.Tetrimino.call(that, config);
 
+		that.color = "cyan";
+
 		that.matrix = {
 			"0": horizontal,
 			"90": vertical,
@@ -137,6 +145,8 @@
 
 		TetrisNamespace.Tetrimino.call(that, config);
 
+		that.color = "green";
+
 		that.matrix = {
 			"0": horizontal,
 			"90": vertical,
@@ -152,6 +162,8 @@
 		var that = this;
 
 		TetrisNamespace.Tetrimino.call(that, config);
+
+		that.color = "purple";
 
 		that.matrix = {
 			"0":
@@ -198,6 +210,7 @@
 
 		TetrisNamespace.Tetrimino.call(that, config);
 
+		that.color = "red";
 		that.matrix = {
 			"0": horizontal,
 			"90": vertical,

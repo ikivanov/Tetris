@@ -42,7 +42,7 @@
 				var line = [];
 
 				for (var j = 0; j < BOARD_GRID_WIDTH; j++) {
-					line.push(0);
+					line.push({used: 0, color: 0});
 				}
 
 				that.boardGrid.push(line);
@@ -99,11 +99,11 @@
 						that.fallingTetrimino.isDown = true;
 					}
 
-					if (!that.fallingTetrimino.isDown && that.boardGridCopy[that.fallingTetrimino.row + i + 1][that.fallingTetrimino.col + j] === 1) {
+					if (!that.fallingTetrimino.isDown && that.boardGridCopy[that.fallingTetrimino.row + i + 1][that.fallingTetrimino.col + j].used === 1) {
 						that.fallingTetrimino.isDown = true; //if next line is occupied
 					}
 
-					that.boardGrid[that.fallingTetrimino.row + i][that.fallingTetrimino.col + j] = 1;
+					that.boardGrid[that.fallingTetrimino.row + i][that.fallingTetrimino.col + j] = {used: 1, color: that.fallingTetrimino.color};
 				}
 			}
 		},
@@ -128,17 +128,19 @@
 				for (var j = 0; j < BOARD_GRID_WIDTH; j++) {
 					var atom = that.boardGrid[i][j];
 
-					if (!atom) {
+					if (!atom.used) {
 						continue;
 					}
 
 					ctx.lineWidth = 2;
-					ctx.strokeStyle = "red";
+					ctx.strokeStyle = "white";
+					ctx.fillStyle = atom.color;
 
 					var x = j * 25 + 4,
 						y = i * 25 + 4;
 
 					ctx.strokeRect(x, y, 25, 25);
+					ctx.fillRect(x, y, 25, 25);
 				}
 			}
 
@@ -153,19 +155,19 @@
 		_saveBoardState: function() {
 			var that = this;
 
-			that.boardGridCopy = [];
-			for (var i = 0; i < that.boardGrid.length; i++) {
-				that.boardGridCopy.push(that.boardGrid[i].slice());
-			}
+			that.boardGridCopy = that._deepClone(that.boardGrid);
 		},
 
 		_restoreBoardState: function() {
 			var that = this;
 
-			that.boardGrid = [];
-			for (var i = 0; i < that.boardGridCopy.length; i++) {
-				that.boardGrid.push(that.boardGridCopy[i].slice());
-			}
+			that.boardGrid = that._deepClone(that.boardGridCopy);
+		},
+
+		_deepClone: function(object) {
+			if (!object) return null;
+
+			return JSON.parse(JSON.stringify(object));
 		},
 
 		_renderBackground: function() {
@@ -210,8 +212,10 @@
 					}
 
 					ctx.lineWidth = 2;
-					ctx.strokeStyle = "red";
+					ctx.strokeStyle = "white";
+					ctx.fillStyle = that.nextTetrimino.color;
 					ctx.strokeRect(startX + j * 25, startY + i * 25, 25, 25);
+					ctx.fillRect(startX + j * 25, startY + i * 25, 25, 25);
 				}
 			}
 		},
