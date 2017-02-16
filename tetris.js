@@ -194,8 +194,10 @@
 			ctx.fillText("Next:", 320, 75);
 
 			for (var i = 0; i < tetriminoMatrix.length; i++) {
-				for (var j = 0; j < tetriminoMatrix[i].length; j++) {
-					var atom = tetriminoMatrix[i][j];
+				var row = tetriminoMatrix[i];
+
+				for (var j = 0; j < row.length; j++) {
+					var atom = row[j];
 
 					if (!atom) {
 						continue;
@@ -203,7 +205,7 @@
 
 					ctx.lineWidth = 2;
 					ctx.strokeStyle = "red";
-					ctx.strokeRect(startX + i * 25, startY + j * 25, 25, 25);
+					ctx.strokeRect(startX + j * 25, startY + i * 25, 25, 25);
 				}
 			}
 		},
