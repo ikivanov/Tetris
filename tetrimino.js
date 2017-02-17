@@ -11,46 +11,73 @@
 
 		that.isDown = false;
 
-		that.lastKeyPressedTime = new Date();
 		that.keyPressedInterval = 40;
 		that.lastUpdatedTime = new Date();
 		that.updateInterval = 500;
 	}
 
 	Tetrimino.prototype = {
-		getMatrix: function() {
+		getMatrix: function(angle) {
 			var that = this;
 
-			return that.matrix[that.angle];
+			if (angle === undefined) {
+				return that.matrix[that.angle];
+			}
+
+			if ([0, 90, 180, 270].indexOf(angle) === -1) {
+				throw new Error("Invalid tetrimino angle.");
+			}
+
+			return that.matrix[angle];
+		},
+
+		getLength: function(angle) {
+			var that = this;
+
+			if (angle === undefined) {
+				return that.matrix[that.angle][0].length;
+			}
+
+			if ([0, 90, 180, 270].indexOf(angle) === -1) {
+				throw new Error("Invalid tetrimino angle.");
+			}
+
+			return that.matrix[angle][0].length;
 		},
 
 		update: function(keyCode) {
 			var that = this,
-				now = new Date();
+				now = new Date(),
+				tetris = TetrisNamespace.TetrisGame,
+				matrix = that.getMatrix();
 
 			if (that.isDown) {
 				return;
 			}
 
 			if (keyCode && keyCode === "ArrowLeft") {
-				if (that.col > 0) {
+				if (that.col > 0 && !tetris.hasCollisionOnLeft(that)) {
 					that.col--;
-					that.lastKeyPressedTime = now;
 				}
 			}
 
 			if (keyCode && keyCode === "ArrowRight") {
-				if (that.col < 9) {
+				if (that.col < (12 - matrix[0].length) && !tetris.hasCollisionOnRight(that)) {
 					that.col++;
-					that.lastKeyPressedTime = new Date();
 				}
 			}
 
 			if (keyCode && keyCode === "ArrowUp") {
-				if (that.angle === 270) {
-					that.angle = 0;
+				var newAngle = that.angle;
+
+				if (newAngle === 270) {
+					newAngle = 0;
 				} else {
-					that.angle += 90;
+					newAngle += 90;
+				}
+
+				if (tetris.canRotate(that, newAngle)) {
+					that.angle = newAngle;
 				}
 			}
 
@@ -65,13 +92,6 @@
 
 				that.lastUpdatedTime = new Date();
 			}
-		},
-
-		_canProcessKeyboardInput: function() {
-			var that = this,
-				now = new Date();
-
-			return now.getTime() - that.lastKeyPressedTime.getTime() > that.keyPressedInterval;
 		},
 
 		_canUpdate: function() {

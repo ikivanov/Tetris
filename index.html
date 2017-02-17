@@ -1,6 +1,11 @@
 <html>
 	<body>
 		<canvas id="scene" width="450" height="508"></canvas>
+		<div>
+			<button id="start">Start</button>
+			<button id="pause">Pause</button>
+			<button id="stop">Game Over</button>
+		</div>
 	</body>
 
 	<script type="text/javascript" src="requestAnimationFramePollyfill.js"></script>
@@ -12,12 +17,30 @@
 
 	<script type="text/javascript">
 		window.onload = function() {
+			window.TetrisNamespace = window.TetrisNamespace || {};
+
 			var canvas = document.getElementById("scene"),
 				tetris = new TetrisNamespace.Tetris({
 					canvas: canvas
 				});
 
+			TetrisNamespace.TetrisGame = tetris;
 			tetris.render();
+
+			var startBtn = document.getElementById("start");
+			startBtn.addEventListener("click", function() {
+				tetris.start();
+			});
+
+			var pauseBtn = document.getElementById("pause");
+			pauseBtn.addEventListener("click", function() {
+				tetris.pause();
+			});
+
+			var stopBtn = document.getElementById("stop");
+			stopBtn.addEventListener("click", function() {
+				//tetris.pause();
+			});
 		}
 	</script>
 </html>

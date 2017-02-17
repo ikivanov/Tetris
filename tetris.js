@@ -4,6 +4,7 @@
 
 		that.canvas = config.canvas;
 		that.context = that.canvas.getContext("2d");
+		that.isPaused = false;
 
 		that.fpsLabel = new TetrisNamespace.FPSLabel({
 			context: that.context,
@@ -51,8 +52,22 @@
 			that._saveBoardState();
 		},
 
+		start: function() {
+			this.isPaused = false;
+
+			this.render();
+		},
+
+		pause: function() {
+			this.isPaused = true;
+		},
+
 		render: function() {
 			var that = this;
+
+			if (that.isPaused) {
+				return;
+			}
 
 			that._invalidate();
 
@@ -106,6 +121,58 @@
 					that.boardGrid[that.fallingTetrimino.row + i][that.fallingTetrimino.col + j] = {used: 1, color: that.fallingTetrimino.color};
 				}
 			}
+		},
+
+		canRotate: function(tetrimino, angle) {
+			return tetrimino.col + tetrimino.getLength(angle) <= BOARD_GRID_WIDTH;
+		},
+
+		hasCollisionOnLeft: function(tetrimino) {
+			var that = this,
+				matrix = tetrimino.getMatrix();
+
+			if (tetrimino.col === 0) {
+				return true;
+			}
+
+			for (var i = 0; i < matrix.length; i++) {
+				var row = matrix[i],
+					firstAtomIndex = row.indexOf(1);
+
+				if (firstAtomIndex === -1) {
+					continue;
+				}
+
+				if (that.boardGridCopy[tetrimino.row + i][tetrimino.col + firstAtomIndex - 1].used === 1) {
+					return true;
+				}
+			}
+
+			return false;
+		},
+
+		hasCollisionOnRight: function(tetrimino) {
+			var that = this,
+				matrix = tetrimino.getMatrix();
+
+			if (tetrimino.col === BOARD_GRID_WIDTH - 1) {
+				return true;
+			}
+
+			for (var i = 0; i < matrix.length; i++) {
+				var row = matrix[i],
+					lastAtomIndex = row.lastIndexOf(1);
+
+				if (lastAtomIndex === -1) {
+					continue;
+				}
+
+				if (that.boardGridCopy[tetrimino.row + i][tetrimino.col + lastAtomIndex + 1].used === 1) {
+					return true;
+				}
+			}
+
+			return false;
 		},
 
 		_render: function() {
