@@ -15,6 +15,7 @@
 		that.nextTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino();
 
 		that.boardGrid = [];
+		that.boardGridCopy = [];
 
 		that.keyboard = {
 			keyPressed: ""
@@ -40,16 +41,20 @@
 			that.boardGrid = [];
 
 			for (var i = 0; i < BOARD_GRID_HEIGHT; i++) {
-				var line = [];
-
-				for (var j = 0; j < BOARD_GRID_WIDTH; j++) {
-					line.push({used: 0, color: 0});
-				}
-
-				that.boardGrid.push(line);
+				that.boardGrid.push(that._createEmptyRow());
 			}
 
 			that._saveBoardState();
+		},
+
+		_createEmptyRow: function() {
+			var row = [];
+
+			for (var j = 0; j < BOARD_GRID_WIDTH; j++) {
+				row.push({used: 0, color: 0});
+			}
+
+			return row;
 		},
 
 		start: function() {
@@ -82,6 +87,30 @@
 			that.context.clearRect(0, 0, that.canvas.width, that.canvas.height);
 
 			that._render();
+		},
+
+		_clearLinesIfNeeded: function() {
+			var that = this,
+				rowsToDelete = [];
+
+			for (var i = 0; i < that.boardGrid.length; i++) {
+				var row = that.boardGrid[i],
+					atomsCount = 0;
+
+				for (var j = 0; j < row.length; j++) {
+					if (row[j].used === 0) {
+						break;
+					} else {
+						atomsCount++;
+					}
+				}
+
+				if (atomsCount === row.length) {
+					that.boardGrid.splice(i, 1);
+					that.boardGrid.unshift(that._createEmptyRow());
+					that._saveBoardState();
+				}
+			}
 		},
 
 		_update: function(keyCode) {
@@ -185,6 +214,15 @@
 
 			that._renderBoard();
 			that._renderNextTetriminoPreview();
+
+			if (that.fallingTetrimino.isDown) {
+				that._saveBoardState();
+
+				that._clearLinesIfNeeded();
+
+				that.fallingTetrimino = that.nextTetrimino;
+				that.nextTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino();
+			}
 		},
 
 		_renderBoard: function() {
@@ -209,13 +247,6 @@
 					ctx.strokeRect(x, y, 25, 25);
 					ctx.fillRect(x, y, 25, 25);
 				}
-			}
-
-			if (that.fallingTetrimino.isDown) {
-				that._saveBoardState();
-
-				that.fallingTetrimino = that.nextTetrimino;
-				that.nextTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino();
 			}
 		},
 
