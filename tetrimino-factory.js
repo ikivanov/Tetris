@@ -19,14 +19,14 @@
 	}
 
 	TetriminoFactory.prototype = {
-		getNextTetrimino: function() {
+		getNextTetrimino: function(tetris) {
 			var that = this,
 				probabilityIndex = Math.floor(Math.random() * that.probabilities.length),
 				id = that.probabilities[probabilityIndex],
 				angleIndex = Math.floor(Math.random() * that.angles.length),
 				angle = that.angles[angleIndex];
 
-			return that.createById(id, {angle: angle});
+			return that.createById(id, {tetris: tetris, angle: angle});
 		},
 
 		createById: function(id, config) {

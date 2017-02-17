@@ -13,7 +13,7 @@
 
 		that.keyPressedInterval = 40;
 		that.lastUpdatedTime = new Date();
-		that.updateInterval = 500;
+		that.updateInterval = that.tetris.levelUpdateInterval;
 	}
 
 	Tetrimino.prototype = {
