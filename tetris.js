@@ -30,27 +30,7 @@
 
 		that._init();
 
-		window.onkeydown = function(event) {
-			var code = event.code;
-
-			if (code === "KeyS") {
-				that.start();
-			}
-
-			if (code === "KeyP") {
-				that.pause();
-			}
-
-			if (that.isGameOver) {
-				return;
-			}
-
-			if (code !== "ArrowLeft" && code !== "ArrowRight" && code !== "ArrowUp" && code !== "ArrowDown") {
-				return;
-			}
-
-			that._invalidate(code);
-		}
+		document.addEventListener("keydown", that._onKeyDown.bind(that));
 	}
 
 	Tetris.prototype = {
@@ -454,6 +434,29 @@
 			ctx.textAlign = "left";
 
 			ctx.fillText("Paused", PAUSE_TEXT_POSITION.x, PAUSE_TEXT_POSITION.y);
+		},
+
+		_onKeyDown: function(e) {
+			var that = this,
+				code = e.code;
+
+			if (code === "KeyS") {
+				that.start();
+			}
+
+			if (code === "KeyP") {
+				that.pause();
+			}
+
+			if (that.isGameOver) {
+				return;
+			}
+
+			if (code !== "ArrowLeft" && code !== "ArrowRight" && code !== "ArrowUp" && code !== "ArrowDown") {
+				return;
+			}
+
+			that._invalidate(code);
 		}
 	};
 
