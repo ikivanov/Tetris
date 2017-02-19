@@ -6,6 +6,7 @@
 		that.context = that.canvas.getContext("2d");
 		that.isPaused = false;
 		that.level = 1;
+		that.isGameOver = false;
 		that.updateIntervalPerLevel = {
 			1: 600,
 			2: 550,
@@ -73,13 +74,23 @@
 		_init: function() {
 			var that = this;
 
+			that.level = 1;
+			that.lines = 0;
+			that.scores = 0;
+			that.keyboard = {
+				keyPressed: ""
+			};
 			that.boardGrid = [];
+			that.boardGridCopy = [];
 
 			for (var i = 0; i < BOARD_GRID_HEIGHT; i++) {
 				that.boardGrid.push(that._createEmptyRow());
 			}
 
 			that._saveBoardState();
+
+			that.fallingTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(that);
+			that.nextTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(that);
 		},
 
 		_createEmptyRow: function() {
@@ -93,9 +104,15 @@
 		},
 
 		start: function() {
-			this.isPaused = false;
+			var that = this;
 
-			this.render();
+			if (that.isGameOver) {
+				that._init();
+			}
+
+			that.isGameOver = that.isPaused = false;
+
+			that.render();
 		},
 
 		pause: function() {
@@ -105,7 +122,13 @@
 		render: function() {
 			var that = this;
 
+			if (that.isGameOver) {
+				that._renderGameOver();
+				return;
+			}
+
 			if (that.isPaused) {
+				that._renderPaused();
 				return;
 			}
 
@@ -261,6 +284,11 @@
 				var rowsRemoved = that._clearLinesIfNeeded();
 				that._updateStatistics(rowsRemoved);
 
+				if (that._isGameOver(that.nextTetrimino)) {
+					that.isGameOver = true;
+					return;
+				}
+
 				that.fallingTetrimino = that.nextTetrimino;
 				that.nextTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(that);
 			}
@@ -396,7 +424,56 @@
 
 		_getScores: function(lines) {
 			return this.scoresFactorPerLinesCompleted[lines];
-		}
+		},
+
+		_isGameOver: function(tetrimino) {
+			var that = this,
+				matrix = tetrimino.getMatrix();
+
+			for (var i = matrix.length - 1; i >= 0; i--) {
+				var row = matrix[i];
+
+				for (var j = 0; j < row.length; j++) {
+					if (row[j] === 1 && (that.boardGrid[i + tetrimino.row][j + tetrimino.col].used === 1)) {
+						return true;
+					}
+				}
+			}
+
+			return false;
+		},
+
+		gameOver: function() {
+			var that = this;
+
+			if (that.isPaused) {
+				return;
+			}
+
+			that.isGameOver = true;
+		},
+
+		_renderGameOver: function() {
+			var that = this,
+				ctx = that.context;
+
+			ctx.font = "20px Arial";
+			ctx.fillStyle = "white";
+			ctx.textAlign = "left";
+
+			ctx.fillText("Game Over!", 100, 250);
+		},
+
+		_renderPaused: function() {
+			var that = this,
+				ctx = that.context;
+
+			ctx.font = "20px Arial";
+			ctx.fillStyle = "white";
+			ctx.textAlign = "left";
+
+			ctx.fillText("Paused", 120, 250);
+		},
 	};
 
 	window.TetrisNamespace = window.TetrisNamespace || {};
