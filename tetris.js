@@ -107,6 +107,10 @@
 			that.fallingTetrimino.update(keyCode);
 
 			that._updateBoardGrid();
+
+			if (that.fallingTetrimino.isDown) {
+				that._onTetriminoDown();
+			}
 		},
 
 		_render: function() {
@@ -121,21 +125,6 @@
 			that._renderNextTetriminoPreview();
 
 			that._renderStatisticsPanel();
-
-			if (that.fallingTetrimino.isDown) {
-				that._saveBoardState();
-
-				var rowsRemoved = that._clearLinesIfNeeded();
-				that._updateStatistics(rowsRemoved);
-
-				if (that._isGameOver(that.nextTetrimino)) {
-					that.isGameOver = true;
-					return;
-				}
-
-				that.fallingTetrimino = that.nextTetrimino;
-				that.nextTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(that);
-			}
 		},
 
 		_createEmptyRow: function() {
@@ -202,6 +191,23 @@
 					that.boardGrid[that.fallingTetrimino.row + i][that.fallingTetrimino.col + j] = { used: 1, color: that.fallingTetrimino.color };
 				}
 			}
+		},
+
+		_onTetriminoDown: function() {
+			var that = this;
+
+			that._saveBoardState();
+
+			var rowsRemoved = that._clearLinesIfNeeded();
+			that._updateStatistics(rowsRemoved);
+
+			if (that._isGameOver(that.nextTetrimino)) {
+				that.isGameOver = true;
+				return;
+			}
+
+			that.fallingTetrimino = that.nextTetrimino;
+			that.nextTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(that);
 		},
 
 		canRotate: function(tetrimino, angle) {
