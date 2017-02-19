@@ -1,17 +1,22 @@
 (function() {
+	const INITIAL_ROW = 0,
+		  INITIAL_COL = 3,
+		  ANGLES = [0, 90, 180, 270],
+		  INVALID_TETRIMINO_ANGLE_MSG = "Invalid tetrimino angle.",
+		  BOARD_GRID_WIDTH = 12;
+
 	function Tetrimino(config) {
 		var that = this;
 
 		that.tetris = config.tetris;
 
-		that.row = config.row || 0;
-		that.col = config.col || 3;
+		that.row = config.row || INITIAL_ROW;
+		that.col = config.col || INITIAL_COL;
 		that.color = config.color || "red";
 		that.angle = config.angle || 0;
 
 		that.isDown = false;
 
-		that.keyPressedInterval = 40;
 		that.lastUpdatedTime = new Date();
 		that.updateInterval = that.tetris.levelUpdateInterval;
 	}
@@ -24,8 +29,8 @@
 				return that.matrix[that.angle];
 			}
 
-			if ([0, 90, 180, 270].indexOf(angle) === -1) {
-				throw new Error("Invalid tetrimino angle.");
+			if (ANGLES.indexOf(angle) === -1) {
+				throw new Error(INVALID_TETRIMINO_ANGLE_MSG);
 			}
 
 			return that.matrix[angle];
@@ -38,8 +43,8 @@
 				return that.matrix[that.angle][0].length;
 			}
 
-			if ([0, 90, 180, 270].indexOf(angle) === -1) {
-				throw new Error("Invalid tetrimino angle.");
+			if (ANGLES.indexOf(angle) === -1) {
+				throw new Error(INVALID_TETRIMINO_ANGLE_MSG);
 			}
 
 			return that.matrix[angle][0].length;
@@ -62,7 +67,7 @@
 			}
 
 			if (keyCode && keyCode === "ArrowRight") {
-				if (that.col < (12 - matrix[0].length) && !tetris.hasCollisionOnRight(that)) {
+				if (that.col < (BOARD_GRID_WIDTH - matrix[0].length) && !tetris.hasCollisionOnRight(that)) {
 					that.col++;
 				}
 			}
@@ -99,16 +104,9 @@
 				now = new Date();
 
 			return now.getTime() - that.lastUpdatedTime.getTime() > that.updateInterval;
-		},
-
-		render: function() {
 		}
 	};
 
 	window.TetrisNamespace = window.TetrisNamespace || {};
 	TetrisNamespace.Tetrimino = Tetrimino;
-
-	const
-		WIDTH = 600,
-		HEIGHT = 600;
 })();

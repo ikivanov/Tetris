@@ -1,66 +1,49 @@
 (function() {
+	const UPDATE_INTERVAL_PER_LEVEL = { 1: 600, 2: 550, 3: 500, 4: 450, 5: 400, 6: 350, 7: 300, 8: 250, 9: 200 },
+			SCORES_FACTOR_PER_LINES_COMPLETED = { 1: 20, 2: 50, 3: 100, 4: 250 },
+			LINES_TO_LEVEL_UP = { 2: 10, 3: 25, 4: 40, 5: 60, 6: 85, 7: 115, 8: 150, 9: 200 },
+			FPS_LABEL_POSITION = { x: 320, y: 25 },
+			TETRIMINO_PREVIEW_CAPTION_POSITION = { x: 320, y: 75 };
+			TETRIMINO_PREVIEW_POSITION = { x: 325, y: 100 },
+			LEVEL_TEXT_POSITION = { x: 320, y: 250 },
+			LINES_TEXT_POSITION = { x: 320, y: 275 },
+			SCORE_TEXT_POSITION = { x: 320, y: 300 },
+			GAME_OVER_TEXT_POSTION = { x: 100, y: 250 },
+			PAUSE_TEXT_POSITION = { x: 120, y: 250 },
+			SPLITTER_POSITION = { x: 307, y: 0 },
+			ATOM_LENGTH = 25,
+			ATOM_OFFSET = 4,
+			BOARD_GRID_WIDTH = 12,
+			BOARD_GRID_HEIGHT = 20,
+			MAX_LEVEL = 9;
+
 	function Tetris(config) {
 		var that = this;
 
 		that.canvas = config.canvas;
 		that.context = that.canvas.getContext("2d");
-		that.isPaused = false;
-		that.level = 1;
-		that.isGameOver = false;
-		that.updateIntervalPerLevel = {
-			1: 600,
-			2: 550,
-			3: 500,
-			4: 450,
-			5: 400,
-			6: 350,
-			7: 300,
-			8: 250,
-			9: 200
-		};
-
-		that.scoresFactorPerLinesCompleted = {
-			1: 20,
-			2: 50,
-			3: 100,
-			4: 250
-		};
-
-		that.linesToLevelUp = {
-			2: 10,
-			3: 25,
-			4: 40,
-			5: 60,
-			6: 85,
-			7: 115,
-			8: 150,
-			9: 200
-		};
-
-		that.levelUpdateInterval = that.updateIntervalPerLevel[that.level];
 
 		that.fpsLabel = new TetrisNamespace.FPSLabel({
 			context: that.context,
-			position: {x: 320, y: 25}
+			position: FPS_LABEL_POSITION
 		});
-
-		that.fallingTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(that);
-		that.nextTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(that);
-
-		that.lines = 0;
-		that.scores = 0;
-
-		that.boardGrid = [];
-		that.boardGridCopy = [];
-
-		that.keyboard = {
-			keyPressed: ""
-		};
 
 		that._init();
 
 		window.onkeydown = function(event) {
 			var code = event.code;
+
+			if (code === "KeyS") {
+				that.start();
+			}
+
+			if (code === "KeyP") {
+				that.pause();
+			}
+
+			if (that.isGameOver) {
+				return;
+			}
 
 			if (code !== "ArrowLeft" && code !== "ArrowRight" && code !== "ArrowUp" && code !== "ArrowDown") {
 				return;
@@ -71,54 +54,6 @@
 	}
 
 	Tetris.prototype = {
-		_init: function() {
-			var that = this;
-
-			that.level = 1;
-			that.lines = 0;
-			that.scores = 0;
-			that.keyboard = {
-				keyPressed: ""
-			};
-			that.boardGrid = [];
-			that.boardGridCopy = [];
-
-			for (var i = 0; i < BOARD_GRID_HEIGHT; i++) {
-				that.boardGrid.push(that._createEmptyRow());
-			}
-
-			that._saveBoardState();
-
-			that.fallingTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(that);
-			that.nextTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(that);
-		},
-
-		_createEmptyRow: function() {
-			var row = [];
-
-			for (var j = 0; j < BOARD_GRID_WIDTH; j++) {
-				row.push({used: 0, color: 0});
-			}
-
-			return row;
-		},
-
-		start: function() {
-			var that = this;
-
-			if (that.isGameOver) {
-				that._init();
-			}
-
-			that.isGameOver = that.isPaused = false;
-
-			that.render();
-		},
-
-		pause: function() {
-			this.isPaused = true;
-		},
-
 		render: function() {
 			var that = this;
 
@@ -137,6 +72,43 @@
 			setTimeout(that.render.bind(that), that.levelUpdateInterval);
 		},
 
+		start: function() {
+			var that = this;
+
+			if (that.isGameOver) {
+				that._init();
+			}
+
+			that.isGameOver = that.isPaused = false;
+
+			that.render();
+		},
+
+		pause: function() {
+			this.isPaused = true;
+		},
+
+		_init: function() {
+			var that = this;
+
+			that.level = 1;
+			that.levelUpdateInterval = UPDATE_INTERVAL_PER_LEVEL[that.level];
+			that.lines = 0;
+			that.scores = 0;
+			that.keyboard = { keyPressed: "" };
+			that.boardGrid = [];
+			that.boardGridCopy = [];
+
+			for (var i = 0; i < BOARD_GRID_HEIGHT; i++) {
+				that.boardGrid.push(that._createEmptyRow());
+			}
+
+			that._saveBoardState();
+
+			that.fallingTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(that);
+			that.nextTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(that);
+		},
+
 		_invalidate: function(keyCode) {
 			var that = this;
 
@@ -145,6 +117,55 @@
 			that.context.clearRect(0, 0, that.canvas.width, that.canvas.height);
 
 			that._render();
+		},
+
+		_update: function(keyCode) {
+			var that = this;
+
+			that.fpsLabel.update();
+
+			that.fallingTetrimino.update(keyCode);
+
+			that._updateBoardGrid();
+		},
+
+		_render: function() {
+			var that = this,
+				ctx = that.context;
+
+			that._renderBackground();
+
+			that.fpsLabel.render();
+
+			that._renderBoard();
+			that._renderNextTetriminoPreview();
+
+			that._renderStatisticsPanel();
+
+			if (that.fallingTetrimino.isDown) {
+				that._saveBoardState();
+
+				var rowsRemoved = that._clearLinesIfNeeded();
+				that._updateStatistics(rowsRemoved);
+
+				if (that._isGameOver(that.nextTetrimino)) {
+					that.isGameOver = true;
+					return;
+				}
+
+				that.fallingTetrimino = that.nextTetrimino;
+				that.nextTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(that);
+			}
+		},
+
+		_createEmptyRow: function() {
+			var row = [];
+
+			for (var j = 0; j < BOARD_GRID_WIDTH; j++) {
+				row.push({ used: 0, color: 0 });
+			}
+
+			return row;
 		},
 
 		_clearLinesIfNeeded: function() {
@@ -174,16 +195,6 @@
 			return rowsRemoved;
 		},
 
-		_update: function(keyCode) {
-			var that = this;
-
-			that.fpsLabel.update();
-
-			that.fallingTetrimino.update(keyCode);
-
-			that._updateBoardGrid();
-		},
-
 		_updateBoardGrid: function() {
 			var that = this,
 				tetriminoMatrix = that.fallingTetrimino.getMatrix();
@@ -208,7 +219,7 @@
 						that.fallingTetrimino.isDown = true; //if next line is occupied
 					}
 
-					that.boardGrid[that.fallingTetrimino.row + i][that.fallingTetrimino.col + j] = {used: 1, color: that.fallingTetrimino.color};
+					that.boardGrid[that.fallingTetrimino.row + i][that.fallingTetrimino.col + j] = { used: 1, color: that.fallingTetrimino.color };
 				}
 			}
 		},
@@ -265,35 +276,6 @@
 			return false;
 		},
 
-		_render: function() {
-			var that = this,
-				ctx = that.context;
-
-			that._renderBackground();
-
-			that.fpsLabel.render();
-
-			that._renderBoard();
-			that._renderNextTetriminoPreview();
-
-			that._renderStatisticsPanel();
-
-			if (that.fallingTetrimino.isDown) {
-				that._saveBoardState();
-
-				var rowsRemoved = that._clearLinesIfNeeded();
-				that._updateStatistics(rowsRemoved);
-
-				if (that._isGameOver(that.nextTetrimino)) {
-					that.isGameOver = true;
-					return;
-				}
-
-				that.fallingTetrimino = that.nextTetrimino;
-				that.nextTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(that);
-			}
-		},
-
 		_renderBoard: function() {
 			var that = this,
 				ctx = that.context;
@@ -310,11 +292,11 @@
 					ctx.strokeStyle = "white";
 					ctx.fillStyle = atom.color;
 
-					var x = j * 25 + 4,
-						y = i * 25 + 4;
+					var x = j * ATOM_LENGTH + ATOM_OFFSET,
+						y = i * ATOM_LENGTH + ATOM_OFFSET;
 
-					ctx.strokeRect(x, y, 25, 25);
-					ctx.fillRect(x, y, 25, 25);
+					ctx.strokeRect(x, y, ATOM_LENGTH, ATOM_LENGTH);
+					ctx.fillRect(x, y, ATOM_LENGTH, ATOM_LENGTH);
 				}
 			}
 		},
@@ -343,16 +325,16 @@
 
 
 			ctx.fillStyle = "black";
-			ctx.fillRect(0, 0, WIDTH, HEIGHT);
+			ctx.fillRect(0, 0, that.canvas.width, that.canvas.height);
 
 			ctx.lineWidth = 5;
-			ctx.strokeStyle = "cyan";
+			ctx.strokeStyle = "brown";
 			ctx.strokeRect(0, 0, that.canvas.width, that.canvas.height);
 
 			ctx.beginPath();
 			ctx.lineWidth = 2;
-			ctx.moveTo(307, 0);
-			ctx.lineTo(307, that.canvas.height);
+			ctx.moveTo(SPLITTER_POSITION.x, SPLITTER_POSITION.y);
+			ctx.lineTo(SPLITTER_POSITION.x, that.canvas.height);
 			ctx.stroke();
 		},
 
@@ -360,13 +342,13 @@
 			var that = this,
 				ctx = that.context,
 				tetriminoMatrix = that.nextTetrimino.getMatrix(),
-				startX = 325,
-				startY = 100;
+				startX = TETRIMINO_PREVIEW_POSITION.x,
+				startY = TETRIMINO_PREVIEW_POSITION.y;
 
 			ctx.font = "16px Arial";
 			ctx.fillStyle = "white";
 			ctx.textAlign = "left";
-			ctx.fillText("Next:", 320, 75);
+			ctx.fillText("Next:", TETRIMINO_PREVIEW_CAPTION_POSITION.x, TETRIMINO_PREVIEW_CAPTION_POSITION.y);
 
 			for (var i = 0; i < tetriminoMatrix.length; i++) {
 				var row = tetriminoMatrix[i];
@@ -381,8 +363,8 @@
 					ctx.lineWidth = 2;
 					ctx.strokeStyle = "white";
 					ctx.fillStyle = that.nextTetrimino.color;
-					ctx.strokeRect(startX + j * 25, startY + i * 25, 25, 25);
-					ctx.fillRect(startX + j * 25, startY + i * 25, 25, 25);
+					ctx.strokeRect(startX + j * ATOM_LENGTH, startY + i * ATOM_LENGTH, ATOM_LENGTH, ATOM_LENGTH);
+					ctx.fillRect(startX + j * ATOM_LENGTH, startY + i * ATOM_LENGTH, ATOM_LENGTH, ATOM_LENGTH);
 				}
 			}
 		},
@@ -395,9 +377,9 @@
 			ctx.fillStyle = "white";
 			ctx.textAlign = "left";
 
-			ctx.fillText("Level: " + that.level, 320, 250);
-			ctx.fillText("Lines: " + that.lines, 320, 275)
-			ctx.fillText("Scores: " + that.scores, 320, 300)
+			ctx.fillText("Level: " + that.level, LEVEL_TEXT_POSITION.x, LEVEL_TEXT_POSITION.y);
+			ctx.fillText("Lines: " + that.lines, LINES_TEXT_POSITION.x, LINES_TEXT_POSITION.y)
+			ctx.fillText("Scores: " + that.scores, SCORE_TEXT_POSITION.x, SCORE_TEXT_POSITION.y)
 		},
 
 		_updateStatistics: function(rowsRemoved) {
@@ -411,11 +393,10 @@
 			that.scores += scores;
 			that.lines += rowsRemoved;
 
-			if (that.level < 9) {
-				var linesToLevelUp = that.linesToLevelUp[that.level + 1];
-				if (that.lines >= linesToLevelUp) {
+			if (that.level < MAX_LEVEL) {
+				if (that.lines >= LINES_TO_LEVEL_UP[that.level + 1]) {
 					that.level++;
-					that.levelUpdateInterval = that.updateIntervalPerLevel[that.level];
+					that.levelUpdateInterval = UPDATE_INTERVAL_PER_LEVEL[that.level];
 					that.fallingTetrimino.updateInterval = that.levelUpdateInterval;
 					that.nextTetrimino.updateInterval = that.levelUpdateInterval;
 				}
@@ -423,7 +404,7 @@
 		},
 
 		_getScores: function(lines) {
-			return this.scoresFactorPerLinesCompleted[lines];
+			return SCORES_FACTOR_PER_LINES_COMPLETED[lines];
 		},
 
 		_isGameOver: function(tetrimino) {
@@ -461,7 +442,7 @@
 			ctx.fillStyle = "white";
 			ctx.textAlign = "left";
 
-			ctx.fillText("Game Over!", 100, 250);
+			ctx.fillText("Game Over!", GAME_OVER_TEXT_POSTION.x, GAME_OVER_TEXT_POSTION.y);
 		},
 
 		_renderPaused: function() {
@@ -472,16 +453,10 @@
 			ctx.fillStyle = "white";
 			ctx.textAlign = "left";
 
-			ctx.fillText("Paused", 120, 250);
-		},
+			ctx.fillText("Paused", PAUSE_TEXT_POSITION.x, PAUSE_TEXT_POSITION.y);
+		}
 	};
 
 	window.TetrisNamespace = window.TetrisNamespace || {};
 	TetrisNamespace.Tetris = Tetris;
-
-	const
-		WIDTH = 600,
-		HEIGHT = 600,
-		BOARD_GRID_WIDTH = 12,
-		BOARD_GRID_HEIGHT = 20
 })();

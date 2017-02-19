@@ -39,8 +39,4 @@
 
 	window.TetrisNamespace = window.TetrisNamespace || {};
 	TetrisNamespace.FPSLabel = FPSLabel;
-
-	const
-		WIDTH = 600,
-		HEIGHT = 600;
 })();
