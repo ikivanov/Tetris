@@ -47,9 +47,11 @@
 				return;
 			}
 
-			that._invalidate();
+			setTimeout(function() {
+				requestAnimationFrame(that.render.bind(that));
 
-			setTimeout(that.render.bind(that), that.levelUpdateInterval);
+				that._invalidate();
+			}, that.levelUpdateInterval);
 		},
 
 		start: function() {
