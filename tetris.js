@@ -456,7 +456,7 @@
 				that.pause();
 			}
 
-			if (that.isGameOver) {
+			if (that.isGameOver || that.isPaused) {
 				return;
 			}
 
