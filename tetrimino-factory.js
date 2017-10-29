@@ -1,7 +1,7 @@
 (function() {
 	window.TetrisNamespace = window.TetrisNamespace || {};
 
-	var TetriminoName = {
+	const TetriminoName = {
 		"I": "ITetrimino",
 		"J": "JTetrimino",
 		"L": "LTetrimino",
@@ -11,37 +11,33 @@
 		"Z": "ZTetrimino"
 	}
 
-	function TetriminoFactory() {
-		var that = this;
+	class TetriminoFactory {
+		constructor() {
+			this.angles = [0, 90, 180, 270];
+			this.probabilities = ["I", "J", "L", "O", "S", "T", "Z"];
+		}
 
-		that.angles = [0, 90, 180, 270];
-		that.probabilities = ["I", "J", "L", "O", "S", "T", "Z"];
-	}
+		getNextTetrimino(tetris) {
+			const probabilityIndex = Math.floor(Math.random() * this.probabilities.length),
+				id = this.probabilities[probabilityIndex],
+				angleIndex = Math.floor(Math.random() * this.angles.length),
+				angle = this.angles[angleIndex];
 
-	TetriminoFactory.prototype = {
-		getNextTetrimino: function(tetris) {
-			var that = this,
-				probabilityIndex = Math.floor(Math.random() * that.probabilities.length),
-				id = that.probabilities[probabilityIndex],
-				angleIndex = Math.floor(Math.random() * that.angles.length),
-				angle = that.angles[angleIndex];
+			return this.createById(id, {tetris: tetris, angle: angle});
+		}
 
-			return that.createById(id, {tetris: tetris, angle: angle});
-		},
-
-		createById: function(id, config) {
-			var name = TetriminoName[id];
+		createById(id, config) {
+			const name = TetriminoName[id];
 
 			if (!name) {
 				throw new Error("Invalid tetrimino identifier!");
 			}
 
-			var tetrimino = new TetrisNamespace[name](config);
+			const tetrimino = new TetrisNamespace[name](config);
 			return tetrimino;
 		}
-	};
+	}
 
 	TetrisNamespace.TetriminoName = TetriminoName;
 	TetrisNamespace.TetriminoFactory = new TetriminoFactory();
 }) ();
-

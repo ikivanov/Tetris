@@ -17,137 +17,123 @@
 			BOARD_GRID_HEIGHT = 20,
 			MAX_LEVEL = 9;
 
-	function Tetris(config) {
-		var that = this;
+	class Tetris {
+		constructor(config) {
+			this.canvas = config.canvas;
+			this.context = this.canvas.getContext("2d");
 
-		that.canvas = config.canvas;
-		that.context = that.canvas.getContext("2d");
+			this.fpsLabel = new TetrisNamespace.FPSLabel({
+				context: this.context,
+				position: FPS_LABEL_POSITION
+			});
 
-		that.fpsLabel = new TetrisNamespace.FPSLabel({
-			context: that.context,
-			position: FPS_LABEL_POSITION
-		});
+			this._init();
 
-		that._init();
+			document.addEventListener("keydown", this._onKeyDown.bind(this));
+		}
 
-		document.addEventListener("keydown", that._onKeyDown.bind(that));
-	}
-
-	Tetris.prototype = {
-		render: function() {
-			var that = this;
-
-			if (that.isGameOver) {
-				that._renderGameOver();
+		render() {
+			if (this.isGameOver) {
+				this._renderGameOver();
 				return;
 			}
 
-			if (that.isPaused) {
-				that._renderPaused();
+			if (this.isPaused) {
+				this._renderPaused();
 				return;
 			}
 
-			setTimeout(function() {
-				requestAnimationFrame(that.render.bind(that));
+			setTimeout(() => {
+				requestAnimationFrame(this.render.bind(this));
 
-				that._invalidate();
-			}, that.levelUpdateInterval);
-		},
+				this._invalidate();
+			}, this.levelUpdateInterval);
+		}
 
-		start: function() {
-			var that = this;
-
-			if (that.isGameOver) {
-				that._init();
+		start() {
+			if (this.isGameOver) {
+				this._init();
 			}
 
-			that.isGameOver = that.isPaused = false;
+			this.isGameOver = this.isPaused = false;
 
-			that.render();
-		},
+			this.render();
+		}
 
-		pause: function() {
+		pause() {
 			this.isPaused = true;
-		},
+		}
 
-		_init: function() {
-			var that = this;
+		_init() {
+			this.level = 1;
+			this.levelUpdateInterval = UPDATE_INTERVAL_PER_LEVEL[this.level];
+			this.lines = 0;
+			this.scores = 0;
+			this.keyboard = { keyPressed: "" };
+			this.boardGrid = [];
+			this.boardGridCopy = [];
 
-			that.level = 1;
-			that.levelUpdateInterval = UPDATE_INTERVAL_PER_LEVEL[that.level];
-			that.lines = 0;
-			that.scores = 0;
-			that.keyboard = { keyPressed: "" };
-			that.boardGrid = [];
-			that.boardGridCopy = [];
-
-			for (var i = 0; i < BOARD_GRID_HEIGHT; i++) {
-				that.boardGrid.push(that._createEmptyRow());
+			for (let i = 0; i < BOARD_GRID_HEIGHT; i++) {
+				this.boardGrid.push(this._createEmptyRow());
 			}
 
-			that._saveBoardState();
+			this._saveBoardState();
 
-			that.fallingTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(that);
-			that.nextTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(that);
-		},
+			this.fallingTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(this);
+			this.nextTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(this);
+		}
 
-		_invalidate: function(keyCode) {
-			var that = this;
+		_invalidate(keyCode) {
+			this._update(keyCode);
 
-			that._update(keyCode);
+			this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-			that.context.clearRect(0, 0, that.canvas.width, that.canvas.height);
+			this._render();
+		}
 
-			that._render();
-		},
+		_update(keyCode) {
+			this.fpsLabel.update();
 
-		_update: function(keyCode) {
-			var that = this;
+			this.fallingTetrimino.update(keyCode);
 
-			that.fpsLabel.update();
+			this._updateBoardGrid();
 
-			that.fallingTetrimino.update(keyCode);
-
-			that._updateBoardGrid();
-
-			if (that.fallingTetrimino.isDown) {
-				that._onTetriminoDown();
+			if (this.fallingTetrimino.isDown) {
+				this._onTetriminoDown();
 			}
-		},
+		}
 
-		_render: function() {
-			var that = this,
-				ctx = that.context;
+		_render() {
+			const ctx = this.context;
 
-			that._renderBackground();
+			this._renderBackground();
 
-			that.fpsLabel.render();
+			this.fpsLabel.render();
 
-			that._renderBoard();
-			that._renderNextTetriminoPreview();
+			this._renderBoard();
+			this._renderNextTetriminoPreview();
 
-			that._renderStatisticsPanel();
-		},
+			this._renderStatisticsPanel();
+		}
 
-		_createEmptyRow: function() {
-			var row = [];
+		_createEmptyRow() {
+			const row = [];
 
-			for (var j = 0; j < BOARD_GRID_WIDTH; j++) {
+			for (let j = 0; j < BOARD_GRID_WIDTH; j++) {
 				row.push({ used: 0, color: 0 });
 			}
 
 			return row;
-		},
+		}
 
-		_clearLinesIfNeeded: function() {
-			var that = this,
-				rowsRemoved = 0;
+		_clearLinesIfNeeded() {
+			let rowsRemoved = 0;
 
-			for (var i = 0; i < that.boardGrid.length; i++) {
-				var row = that.boardGrid[i],
-					atomsCount = 0;
+			for (let i = 0; i < this.boardGrid.length; i++) {
+				const row = this.boardGrid[i];
+				let atomsCount = 0;
 
-				for (var j = 0; j < row.length; j++) {
+				for (let j = 0; j < row.length; j++) {
 					if (row[j].used === 0) {
 						break;
 					} else {
@@ -156,121 +142,116 @@
 				}
 
 				if (atomsCount === row.length) {
-					that.boardGrid.splice(i, 1);
-					that.boardGrid.unshift(that._createEmptyRow());
-					that._saveBoardState();
+					this.boardGrid.splice(i, 1);
+					this.boardGrid.unshift(this._createEmptyRow());
+					this._saveBoardState();
 					rowsRemoved++;
 				}
 			}
 
 			return rowsRemoved;
-		},
+		}
 
-		_updateBoardGrid: function() {
-			var that = this,
-				tetriminoMatrix = that.fallingTetrimino.getMatrix();
+		_updateBoardGrid() {
+			const tetriminoMatrix = this.fallingTetrimino.getMatrix();
 
-			that._restoreBoardState();
+			this._restoreBoardState();
 
-			for (var i = tetriminoMatrix.length - 1; i >= 0; i--) {
-				var row = tetriminoMatrix[i];
+			for (let i = tetriminoMatrix.length - 1; i >= 0; i--) {
+				const row = tetriminoMatrix[i];
 
-				for (var j = 0; j < row.length; j++) {
-					var atom = row[j];
+				for (let j = 0; j < row.length; j++) {
+					const atom = row[j];
 
 					if (!atom) {
 						continue;
 					}
 
-					if (that.fallingTetrimino.row + i === that.boardGrid.length - 1) {
-						that.fallingTetrimino.isDown = true;
+					if (this.fallingTetrimino.row + i === this.boardGrid.length - 1) {
+						this.fallingTetrimino.isDown = true;
 					}
 
-					if (!that.fallingTetrimino.isDown && that.boardGridCopy[that.fallingTetrimino.row + i + 1][that.fallingTetrimino.col + j].used === 1) {
-						that.fallingTetrimino.isDown = true; //if next line is occupied
+					if (!this.fallingTetrimino.isDown && this.boardGridCopy[this.fallingTetrimino.row + i + 1][this.fallingTetrimino.col + j].used === 1) {
+						this.fallingTetrimino.isDown = true; //if next line is occupied
 					}
 
-					that.boardGrid[that.fallingTetrimino.row + i][that.fallingTetrimino.col + j] = { used: 1, color: that.fallingTetrimino.color };
+					this.boardGrid[this.fallingTetrimino.row + i][this.fallingTetrimino.col + j] = { used: 1, color: this.fallingTetrimino.color };
 				}
 			}
-		},
+		}
 
-		_onTetriminoDown: function() {
-			var that = this;
+		_onTetriminoDown() {
+			this._saveBoardState();
 
-			that._saveBoardState();
+			const rowsRemoved = this._clearLinesIfNeeded();
 
-			var rowsRemoved = that._clearLinesIfNeeded();
-			that._updateStatistics(rowsRemoved);
+			this._updateStatistics(rowsRemoved);
 
-			if (that._isGameOver(that.nextTetrimino)) {
-				that.isGameOver = true;
+			if (this._isGameOver(this.nextTetrimino)) {
+				this.isGameOver = true;
 				return;
 			}
 
-			that.fallingTetrimino = that.nextTetrimino;
-			that.nextTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(that);
-		},
+			this.fallingTetrimino = this.nextTetrimino;
+			this.nextTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(this);
+		}
 
-		canRotate: function(tetrimino, angle) {
+		canRotate(tetrimino, angle) {
 			return tetrimino.col + tetrimino.getLength(angle) <= BOARD_GRID_WIDTH;
-		},
+		}
 
-		hasCollisionOnLeft: function(tetrimino) {
-			var that = this,
-				matrix = tetrimino.getMatrix();
+		hasCollisionOnLeft(tetrimino) {
+			const matrix = tetrimino.getMatrix();
 
 			if (tetrimino.col === 0) {
 				return true;
 			}
 
-			for (var i = 0; i < matrix.length; i++) {
-				var row = matrix[i],
+			for (let i = 0; i < matrix.length; i++) {
+				const row = matrix[i],
 					firstAtomIndex = row.indexOf(1);
 
 				if (firstAtomIndex === -1) {
 					continue;
 				}
 
-				if (that.boardGridCopy[tetrimino.row + i][tetrimino.col + firstAtomIndex - 1].used === 1) {
+				if (this.boardGridCopy[tetrimino.row + i][tetrimino.col + firstAtomIndex - 1].used === 1) {
 					return true;
 				}
 			}
 
 			return false;
-		},
+		}
 
-		hasCollisionOnRight: function(tetrimino) {
-			var that = this,
-				matrix = tetrimino.getMatrix();
+		hasCollisionOnRight(tetrimino) {
+			const matrix = tetrimino.getMatrix();
 
 			if (tetrimino.col === BOARD_GRID_WIDTH - 1) {
 				return true;
 			}
 
-			for (var i = 0; i < matrix.length; i++) {
-				var row = matrix[i],
+			for (let i = 0; i < matrix.length; i++) {
+				const row = matrix[i],
 					lastAtomIndex = row.lastIndexOf(1);
 
 				if (lastAtomIndex === -1) {
 					continue;
 				}
 
-				if (that.boardGridCopy[tetrimino.row + i][tetrimino.col + lastAtomIndex + 1].used === 1) {
+				if (this.boardGridCopy[tetrimino.row + i][tetrimino.col + lastAtomIndex + 1].used === 1) {
 					return true;
 				}
 			}
 
 			return false;
-		},
+		}
 
-		_renderBoard: function() {
-			var that = this,
-				ctx = that.context;
+		_renderBoard() {
+			const ctx = this.context;
 
-			for (var i = 0; i < BOARD_GRID_HEIGHT; i++) {
-				for (var j = 0; j < BOARD_GRID_WIDTH; j++) {
-					var atom = that.boardGrid[i][j];
+			for (let i = 0; i < BOARD_GRID_HEIGHT; i++) {
+				for (let j = 0; j < BOARD_GRID_WIDTH; j++) {
+					const atom = this.boardGrid[i][j];
 
 					if (!atom.used) {
 						continue;
@@ -280,56 +261,49 @@
 					ctx.strokeStyle = "white";
 					ctx.fillStyle = atom.color;
 
-					var x = j * ATOM_LENGTH + ATOM_OFFSET,
+					const x = j * ATOM_LENGTH + ATOM_OFFSET,
 						y = i * ATOM_LENGTH + ATOM_OFFSET;
 
 					ctx.strokeRect(x, y, ATOM_LENGTH, ATOM_LENGTH);
 					ctx.fillRect(x, y, ATOM_LENGTH, ATOM_LENGTH);
 				}
 			}
-		},
+		}
 
-		_saveBoardState: function() {
-			var that = this;
+		_saveBoardState() {
+			this.boardGridCopy = this._deepClone(this.boardGrid);
+		}
 
-			that.boardGridCopy = that._deepClone(that.boardGrid);
-		},
+		_restoreBoardState() {
+			this.boardGrid = this._deepClone(this.boardGridCopy);
+		}
 
-		_restoreBoardState: function() {
-			var that = this;
-
-			that.boardGrid = that._deepClone(that.boardGridCopy);
-		},
-
-		_deepClone: function(object) {
+		_deepClone(object) {
 			if (!object) return null;
 
 			return JSON.parse(JSON.stringify(object));
-		},
+		}
 
-		_renderBackground: function() {
-			var that = this,
-				ctx = that.context;
-
+		_renderBackground() {
+			const ctx = this.context;
 
 			ctx.fillStyle = "black";
-			ctx.fillRect(0, 0, that.canvas.width, that.canvas.height);
+			ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
 			ctx.lineWidth = 5;
 			ctx.strokeStyle = "brown";
-			ctx.strokeRect(0, 0, that.canvas.width, that.canvas.height);
+			ctx.strokeRect(0, 0, this.canvas.width, this.canvas.height);
 
 			ctx.beginPath();
 			ctx.lineWidth = 2;
 			ctx.moveTo(SPLITTER_POSITION.x, SPLITTER_POSITION.y);
-			ctx.lineTo(SPLITTER_POSITION.x, that.canvas.height);
+			ctx.lineTo(SPLITTER_POSITION.x, this.canvas.height);
 			ctx.stroke();
-		},
+		}
 
-		_renderNextTetriminoPreview: function() {
-			var that = this,
-				ctx = that.context,
-				tetriminoMatrix = that.nextTetrimino.getMatrix(),
+		_renderNextTetriminoPreview() {
+			const ctx = this.context,
+				tetriminoMatrix = this.nextTetrimino.getMatrix(),
 				startX = TETRIMINO_PREVIEW_POSITION.x,
 				startY = TETRIMINO_PREVIEW_POSITION.y;
 
@@ -338,11 +312,11 @@
 			ctx.textAlign = "left";
 			ctx.fillText("Next:", TETRIMINO_PREVIEW_CAPTION_POSITION.x, TETRIMINO_PREVIEW_CAPTION_POSITION.y);
 
-			for (var i = 0; i < tetriminoMatrix.length; i++) {
-				var row = tetriminoMatrix[i];
+			for (let i = 0; i < tetriminoMatrix.length; i++) {
+				const row = tetriminoMatrix[i];
 
-				for (var j = 0; j < row.length; j++) {
-					var atom = row[j];
+				for (let j = 0; j < row.length; j++) {
+					const atom = row[j];
 
 					if (!atom) {
 						continue;
@@ -350,113 +324,105 @@
 
 					ctx.lineWidth = 2;
 					ctx.strokeStyle = "white";
-					ctx.fillStyle = that.nextTetrimino.color;
+					ctx.fillStyle = this.nextTetrimino.color;
 					ctx.strokeRect(startX + j * ATOM_LENGTH, startY + i * ATOM_LENGTH, ATOM_LENGTH, ATOM_LENGTH);
 					ctx.fillRect(startX + j * ATOM_LENGTH, startY + i * ATOM_LENGTH, ATOM_LENGTH, ATOM_LENGTH);
 				}
 			}
-		},
+		}
 
-		_renderStatisticsPanel: function() {
-			var that = this,
-				ctx = that.context;
+		_renderStatisticsPanel() {
+			const ctx = this.context;
 
 			ctx.font = "14px Arial";
 			ctx.fillStyle = "white";
 			ctx.textAlign = "left";
 
-			ctx.fillText("Level: " + that.level, LEVEL_TEXT_POSITION.x, LEVEL_TEXT_POSITION.y);
-			ctx.fillText("Lines: " + that.lines, LINES_TEXT_POSITION.x, LINES_TEXT_POSITION.y)
-			ctx.fillText("Scores: " + that.scores, SCORE_TEXT_POSITION.x, SCORE_TEXT_POSITION.y)
-		},
+			ctx.fillText("Level: " + this.level, LEVEL_TEXT_POSITION.x, LEVEL_TEXT_POSITION.y);
+			ctx.fillText("Lines: " + this.lines, LINES_TEXT_POSITION.x, LINES_TEXT_POSITION.y)
+			ctx.fillText("Scores: " + this.scores, SCORE_TEXT_POSITION.x, SCORE_TEXT_POSITION.y)
+		}
 
-		_updateStatistics: function(rowsRemoved) {
+		_updateStatistics(rowsRemoved) {
 			if (rowsRemoved === 0) {
 				return;
 			}
 
-			var that = this,
-				scores = rowsRemoved > 0 ? that.level * that._getScores(rowsRemoved) : 0;
+			const scores = rowsRemoved > 0 ? this.level * this._getScores(rowsRemoved) : 0;
 
-			that.scores += scores;
-			that.lines += rowsRemoved;
+			this.scores += scores;
+			this.lines += rowsRemoved;
 
-			if (that.level < MAX_LEVEL) {
-				if (that.lines >= LINES_TO_LEVEL_UP[that.level + 1]) {
-					that.level++;
-					that.levelUpdateInterval = UPDATE_INTERVAL_PER_LEVEL[that.level];
-					that.fallingTetrimino.updateInterval = that.levelUpdateInterval;
-					that.nextTetrimino.updateInterval = that.levelUpdateInterval;
+			if (this.level < MAX_LEVEL) {
+				if (this.lines >= LINES_TO_LEVEL_UP[this.level + 1]) {
+					this.level++;
+					this.levelUpdateInterval = UPDATE_INTERVAL_PER_LEVEL[this.level];
+					this.fallingTetrimino.updateInterval = this.levelUpdateInterval;
+					this.nextTetrimino.updateInterval = this.levelUpdateInterval;
 				}
 			}
-		},
+		}
 
-		_getScores: function(lines) {
+		_getScores(lines) {
 			return SCORES_FACTOR_PER_LINES_COMPLETED[lines];
-		},
+		}
 
-		_isGameOver: function(tetrimino) {
-			var that = this,
-				matrix = tetrimino.getMatrix();
+		_isGameOver(tetrimino) {
+			const matrix = tetrimino.getMatrix();
 
-			for (var i = matrix.length - 1; i >= 0; i--) {
-				var row = matrix[i];
+			for (let i = matrix.length - 1; i >= 0; i--) {
+				const row = matrix[i];
 
-				for (var j = 0; j < row.length; j++) {
-					if (row[j] === 1 && (that.boardGrid[i + tetrimino.row][j + tetrimino.col].used === 1)) {
+				for (let j = 0; j < row.length; j++) {
+					if (row[j] === 1 && (this.boardGrid[i + tetrimino.row][j + tetrimino.col].used === 1)) {
 						return true;
 					}
 				}
 			}
 
 			return false;
-		},
+		}
 
-		gameOver: function() {
-			var that = this;
-
-			if (that.isPaused) {
+		gameOver() {
+			if (this.isPaused) {
 				return;
 			}
 
-			that.isGameOver = true;
-		},
+			this.isGameOver = true;
+		}
 
-		_renderGameOver: function() {
-			var that = this,
-				ctx = that.context;
+		_renderGameOver() {
+			const ctx = this.context;
 
 			ctx.font = "20px Arial";
 			ctx.fillStyle = "white";
 			ctx.textAlign = "left";
 
 			ctx.fillText("Game Over!", GAME_OVER_TEXT_POSTION.x, GAME_OVER_TEXT_POSTION.y);
-		},
+		}
 
-		_renderPaused: function() {
-			var that = this,
-				ctx = that.context;
+		_renderPaused() {
+			const ctx = this.context;
 
 			ctx.font = "20px Arial";
 			ctx.fillStyle = "white";
 			ctx.textAlign = "left";
 
 			ctx.fillText("Paused", PAUSE_TEXT_POSITION.x, PAUSE_TEXT_POSITION.y);
-		},
+		}
 
-		_onKeyDown: function(e) {
-			var that = this,
-				code = e.code;
+		_onKeyDown(e) {
+			const code = e.code;
 
 			if (code === "KeyS") {
-				that.start();
+				this.start();
 			}
 
 			if (code === "KeyP") {
-				that.pause();
+				this.pause();
 			}
 
-			if (that.isGameOver || that.isPaused) {
+			if (this.isGameOver || this.isPaused) {
 				return;
 			}
 
@@ -464,9 +430,9 @@
 				return;
 			}
 
-			that._invalidate(code);
+			this._invalidate(code);
 		}
-	};
+	}
 
 	window.TetrisNamespace = window.TetrisNamespace || {};
 	TetrisNamespace.Tetris = Tetris;

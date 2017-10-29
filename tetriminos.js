@@ -1,223 +1,206 @@
 (function() {
 	window.TetrisNamespace = window.TetrisNamespace || {};
 
-	LTetrimino.prototype = Object.create(TetrisNamespace.Tetrimino.prototype);
-	LTetrimino.prototype.constructor = LTetrimino;
+	class LTetrimino extends TetrisNamespace.Tetrimino {
+		constructor(config) {
+			super(config);
 
-	function LTetrimino(config) {
-		var that = this;
+			this.color = "orange";
 
-		TetrisNamespace.Tetrimino.call(that, config);
+			this.matrix = {
+				"0":
+				[
+					[1, 0],
+					[1, 0],
+					[1, 1]
+				],
+				"90":
+				[
+					[0, 0, 1],
+					[1, 1, 1]
+				],
+				"180":
+				[
+					[1, 1],
+					[0, 1],
+					[0, 1]
+				],
+				"270":
+				[
+					[1, 1, 1],
+					[1, 0, 0]
+				]
+			};
+		}
+	}
 
-		that.color = "orange";
+	class JTetrimino extends TetrisNamespace.Tetrimino {
+		constructor(config) {
+			super(config);
 
-		that.matrix = {
-			"0":
+			this.color = "blue";
+
+			this.matrix = {
+				"0":
+				[
+					[0, 1],
+					[0, 1],
+					[1, 1]
+				],
+				"90":
+				[
+					[1, 1, 1],
+					[0, 0, 1]
+				],
+				"180":
+				[
+					[1, 1],
+					[1, 0],
+					[1, 0]
+				],
+				"270":
+				[
+					[1, 0, 0],
+					[1, 1, 1]
+				]
+			};
+		}
+	}
+
+	class OTetrimino extends TetrisNamespace.Tetrimino {
+		constructor(config) {
+			super(config);
+
+			this.color = "yellow";
+
+			const rotation =
 			[
-				[1, 0],
-				[1, 0],
+				[1, 1],
 				[1, 1]
-			],
-			"90":
-			[
-				[0, 0, 1],
-				[1, 1, 1]
-			],
-			"180":
-			[
-				[1, 1],
-				[0, 1],
-				[0, 1]
-			],
-			"270":
-			[
-				[1, 1, 1],
-				[1, 0, 0]
-			]
-		};
-	};
-
-    JTetrimino.prototype = Object.create(TetrisNamespace.Tetrimino.prototype);
-	JTetrimino.prototype.constructor = JTetrimino;
-
-	function JTetrimino(config) {
-		var that = this;
-
-		TetrisNamespace.Tetrimino.call(that, config);
-
-		that.color = "blue";
-
-		that.matrix = {
-			"0":
-			[
-				[0, 1],
-				[0, 1],
-				[1, 1]
-			],
-			"90":
-			[
-				[1, 1, 1],
-				[0, 0, 1]
-			],
-			"180":
-			[
-				[1, 1],
-				[1, 0],
-				[1, 0]
-			],
-			"270":
-			[
-				[1, 0, 0],
-				[1, 1, 1]
-			]
-		};
-	};
-
-    OTetrimino.prototype = Object.create(TetrisNamespace.Tetrimino.prototype);
-	OTetrimino.prototype.constructor = OTetrimino;
-
-	function OTetrimino(config) {
-		var that = this;
-
-		TetrisNamespace.Tetrimino.call(that, config);
-
-		that.color = "yellow";
-
-		var rotation =
-		[
-			[1, 1],
-			[1, 1]
-		];
-
-		that.matrix = {
-			"0": rotation,
-			"90": rotation,
-			"180": rotation,
-			"270": rotation
-		};
-	};
-
-	ITetrimino.prototype = Object.create(TetrisNamespace.Tetrimino.prototype);
-	ITetrimino.prototype.constructor = ITetrimino;
-
-	function ITetrimino(config) {
-		var that = this,
-			horizontal =
-			[
-				[1, 1, 1, 1]
-			],
-			vertical =
-			[
-				[1],
-				[1],
-				[1],
-				[1]
 			];
 
-		TetrisNamespace.Tetrimino.call(that, config);
+			this.matrix = {
+				"0": rotation,
+				"90": rotation,
+				"180": rotation,
+				"270": rotation
+			};
+		}
+	}
 
-		that.color = "cyan";
+	class ITetrimino extends TetrisNamespace.Tetrimino {
+		constructor(config) {
+			super(config);
 
-		that.matrix = {
-			"0": horizontal,
-			"90": vertical,
-			"180": horizontal,
-			"270": vertical
-		};
-	};
+			const horizontal =
+				[
+					[1, 1, 1, 1]
+				],
+				vertical =
+				[
+					[1],
+					[1],
+					[1],
+					[1]
+				];
 
-	STetrimino.prototype = Object.create(TetrisNamespace.Tetrimino.prototype);
-	STetrimino.prototype.constructor = STetrimino;
 
-	function STetrimino(config) {
-		var that = this,
-			horizontal =
-			[
-				[0, 1, 1],
-				[1, 1, 0]
-			],
-			vertical =
-			[
-				[1, 0],
-				[1, 1],
-				[0, 1]
-			];
+			this.color = "cyan";
 
-		TetrisNamespace.Tetrimino.call(that, config);
+			this.matrix = {
+				"0": horizontal,
+				"90": vertical,
+				"180": horizontal,
+				"270": vertical
+			};
+		}
+	}
 
-		that.color = "green";
+	class STetrimino extends TetrisNamespace.Tetrimino {
+		constructor(config) {
+			super(config);
 
-		that.matrix = {
-			"0": horizontal,
-			"90": vertical,
-			"180": horizontal,
-			"270": vertical
-		};
-	};
+			const horizontal =
+				[
+					[0, 1, 1],
+					[1, 1, 0]
+				],
+				vertical =
+				[
+					[1, 0],
+					[1, 1],
+					[0, 1]
+				];
 
-	TTetrimino.prototype = Object.create(TetrisNamespace.Tetrimino.prototype);
-	TTetrimino.prototype.constructor = TTetrimino;
+			this.color = "green";
 
-	function TTetrimino(config) {
-		var that = this;
+			this.matrix = {
+				"0": horizontal,
+				"90": vertical,
+				"180": horizontal,
+				"270": vertical
+			};
+		}
+	}
 
-		TetrisNamespace.Tetrimino.call(that, config);
+	class TTetrimino extends TetrisNamespace.Tetrimino {
+		constructor(config) {
+			super(config);
 
-		that.color = "purple";
+			this.color = "purple";
 
-		that.matrix = {
-			"0":
-			[
-				[1, 1, 1],
-				[0, 1, 0]
-			],
-			"90":
-			[
-				[0, 1],
-				[1, 1],
-				[0, 1]
-			],
-			"180":
-			[
-				[0, 1, 0],
-				[1, 1, 1]
-			],
-			"270":
-			[
-				[1, 0],
-				[1, 1],
-				[1, 0]
-			]
-		};
-	};
+			this.matrix = {
+				"0":
+				[
+					[1, 1, 1],
+					[0, 1, 0]
+				],
+				"90":
+				[
+					[0, 1],
+					[1, 1],
+					[0, 1]
+				],
+				"180":
+				[
+					[0, 1, 0],
+					[1, 1, 1]
+				],
+				"270":
+				[
+					[1, 0],
+					[1, 1],
+					[1, 0]
+				]
+			};
+		}
+	}
 
-	ZTetrimino.prototype = Object.create(TetrisNamespace.Tetrimino.prototype);
-	ZTetrimino.prototype.constructor = ZTetrimino;
+	class ZTetrimino extends TetrisNamespace.Tetrimino {
+		constructor(config) {
+			super(config);
 
-	function ZTetrimino(config) {
-		var that = this,
-			horizontal =
-			[
-				[1, 1, 0],
-				[0, 1, 1]
-			],
-			vertical =
-			[
-				[0, 1],
-				[1, 1],
-				[1, 0]
-			];
+			const horizontal =
+				[
+					[1, 1, 0],
+					[0, 1, 1]
+				],
+				vertical =
+				[
+					[0, 1],
+					[1, 1],
+					[1, 0]
+				];
 
-		TetrisNamespace.Tetrimino.call(that, config);
-
-		that.color = "red";
-		that.matrix = {
-			"0": horizontal,
-			"90": vertical,
-			"180": horizontal,
-			"270": vertical
-		};
-	};
+			this.color = "red";
+			this.matrix = {
+				"0": horizontal,
+				"90": vertical,
+				"180": horizontal,
+				"270": vertical
+			};
+		}
+	}
 
 	TetrisNamespace.ZTetrimino = ZTetrimino;
 	TetrisNamespace.TTetrimino = TTetrimino;
