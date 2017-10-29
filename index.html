@@ -8,38 +8,25 @@
 		</div>
 	</body>
 
-	<script type="text/javascript" src="requestAnimationFramePollyfill.js"></script>
-	<script type="text/javascript" src="fps-label.js"></script>
-	<script type="text/javascript" src="tetrimino-factory.js"></script>
-	<script type="text/javascript" src="tetrimino.js"></script>
-	<script type="text/javascript" src="tetriminos.js"></script>
-	<script type="text/javascript" src="tetris.js"></script>
+	<script type="text/javascript" src="lib/require.js"></script>
+	<script type="text/javascript" src="lib/requestAnimationFramePollyfill.js"></script>
 
 	<script type="text/javascript">
-		window.onload = function() {
-			window.TetrisNamespace = window.TetrisNamespace || {};
+		window.onload = () => {
+			require(['tetris'], (Tetris) => {
+				const canvas = document.getElementById("scene"),
+					tetris = new Tetris({ canvas });
 
-			var canvas = document.getElementById("scene"),
-				tetris = new TetrisNamespace.Tetris({
-					canvas: canvas
-				});
+				window.TetrisGame = tetris;
+				tetris.render();
 
-			TetrisNamespace.TetrisGame = tetris;
-			tetris.render();
+				const startBtn = document.getElementById("start"),
+					pauseBtn = document.getElementById("pause"),
+					stopBtn = document.getElementById("stop");
 
-			var startBtn = document.getElementById("start");
-			startBtn.addEventListener("click", function() {
-				tetris.start();
-			});
-
-			var pauseBtn = document.getElementById("pause");
-			pauseBtn.addEventListener("click", function() {
-				tetris.pause();
-			});
-
-			var stopBtn = document.getElementById("stop");
-			stopBtn.addEventListener("click", function() {
-				tetris.gameOver();
+				startBtn.addEventListener("click", ()  => tetris.start() );
+				pauseBtn.addEventListener("click", () => tetris.pause() );
+				stopBtn.addEventListener("click", () => tetris.gameOver() );
 			});
 		}
 	</script>

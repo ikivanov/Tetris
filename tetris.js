@@ -1,4 +1,5 @@
-(function() {
+define(['fps-label', 'tetrimino-factory'],
+	function(FPSLabel, TetriminoFactory) {
 	const UPDATE_INTERVAL_PER_LEVEL = { 1: 600, 2: 550, 3: 500, 4: 450, 5: 400, 6: 350, 7: 300, 8: 250, 9: 200 },
 			SCORES_FACTOR_PER_LINES_COMPLETED = { 1: 20, 2: 50, 3: 100, 4: 250 },
 			LINES_TO_LEVEL_UP = { 2: 10, 3: 25, 4: 40, 5: 60, 6: 85, 7: 115, 8: 150, 9: 200 },
@@ -21,8 +22,9 @@
 		constructor(config) {
 			this.canvas = config.canvas;
 			this.context = this.canvas.getContext("2d");
+			this.tetriminoFactory = new TetriminoFactory();
 
-			this.fpsLabel = new TetrisNamespace.FPSLabel({
+			this.fpsLabel = new FPSLabel({
 				context: this.context,
 				position: FPS_LABEL_POSITION
 			});
@@ -79,8 +81,8 @@
 
 			this._saveBoardState();
 
-			this.fallingTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(this);
-			this.nextTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(this);
+			this.fallingTetrimino = this.tetriminoFactory.getNextTetrimino(this);
+			this.nextTetrimino = this.tetriminoFactory.getNextTetrimino(this);
 		}
 
 		_invalidate(keyCode) {
@@ -193,7 +195,7 @@
 			}
 
 			this.fallingTetrimino = this.nextTetrimino;
-			this.nextTetrimino = TetrisNamespace.TetriminoFactory.getNextTetrimino(this);
+			this.nextTetrimino = this.tetriminoFactory.getNextTetrimino(this);
 		}
 
 		canRotate(tetrimino, angle) {
@@ -434,6 +436,5 @@
 		}
 	}
 
-	window.TetrisNamespace = window.TetrisNamespace || {};
-	TetrisNamespace.Tetris = Tetris;
-})();
+	return Tetris;
+});

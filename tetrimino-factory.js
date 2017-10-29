@@ -1,6 +1,11 @@
-(function() {
-	window.TetrisNamespace = window.TetrisNamespace || {};
-
+define(['tetriminos/i-tetrimino',
+		'tetriminos/j-tetrimino',
+		'tetriminos/l-tetrimino',
+		'tetriminos/o-tetrimino',
+		'tetriminos/s-tetrimino',
+		'tetriminos/t-tetrimino',
+		'tetriminos/z-tetrimino'],
+	function(ITetrimino, JTetrimino, LTetrimino, OTetrimino, STetrimino, TTetrimino, ZTetrimino) {
 	const TetriminoName = {
 		"I": "ITetrimino",
 		"J": "JTetrimino",
@@ -33,11 +38,10 @@
 				throw new Error("Invalid tetrimino identifier!");
 			}
 
-			const tetrimino = new TetrisNamespace[name](config);
+			const tetrimino = eval(`new ${name}(config)`);
 			return tetrimino;
 		}
 	}
 
-	TetrisNamespace.TetriminoName = TetriminoName;
-	TetrisNamespace.TetriminoFactory = new TetriminoFactory();
-}) ();
+	return TetriminoFactory;
+});

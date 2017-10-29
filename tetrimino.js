@@ -1,4 +1,4 @@
-(function() {
+define(['tetris'], function() {
 	const INITIAL_ROW = 0,
 		  INITIAL_COL = 3,
 		  ANGLES = [0, 90, 180, 270],
@@ -46,7 +46,7 @@
 
 		update(keyCode) {
 			const now = new Date(),
-				tetris = TetrisNamespace.TetrisGame,
+				tetris = window.TetrisGame,
 				matrix = this.getMatrix();
 
 			if (this.isDown) {
@@ -99,6 +99,5 @@
 		}
 	}
 
-	window.TetrisNamespace = window.TetrisNamespace || {};
-	TetrisNamespace.Tetrimino = Tetrimino;
-})();
+	return Tetrimino;
+});

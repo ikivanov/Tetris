@@ -1,42 +1,37 @@
-(function() {
-	function FPSLabel(config) {
-		var that = this;
+define([], function() {
+	class FPSLabel {
+		constructor(config) {
+			this.context = config.context;
+			this.position = config.position;
 
-		that.context = config.context;
-		that.position = config.position;
+			this.oldTime = new Date();
+			this.framesCounter = 0;
+			this.fps = 0;
+		}
 
-		that.oldTime = new Date();
-		that.framesCounter = 0;
-		that.fps = 0;
-	}
-
-	FPSLabel.prototype = {
-		update: function() {
-			var that = this,
-				ctx = that.context,
+		update() {
+			const ctx = this.context,
 				now = new Date(),
-				diff = now.getTime() - that.oldTime.getTime();
+				diff = now.getTime() - this.oldTime.getTime();
 
 			if (diff < 1000) {
-				that.framesCounter++;
+				this.framesCounter++;
 			} else {
-				that.fps = that.framesCounter;
-				that.framesCounter = 0;
-				that.oldTime = new Date();
+				this.fps = this.framesCounter;
+				this.framesCounter = 0;
+				this.oldTime = new Date();
 			}
-		},
+		}
 
-		render: function() {
-			var that = this,
-				ctx = that.context;
+		render() {
+			const ctx = this.context;
 
 			ctx.font = "14px Arial";
 			ctx.fillStyle = "white";
 			ctx.textAlign = "left";
-			ctx.fillText("fps: " + that.fps, that.position.x, that.position.y);
+			ctx.fillText("fps: " + this.fps, this.position.x, this.position.y);
 		}
-	};
+	}
 
-	window.TetrisNamespace = window.TetrisNamespace || {};
-	TetrisNamespace.FPSLabel = FPSLabel;
-})();
+	return FPSLabel;
+});
